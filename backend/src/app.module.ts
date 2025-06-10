@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { UserModule } from './user/user.module';
-import { AuthModule } from './auth/auth.module';
+import { AppController } from './app.controller.js';
+import { AppService } from './app.service.js';
+import { UserModule } from './user/user.module.js';
+import { AuthModule } from './auth/auth.module.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './entity/user.entity';
+import { User } from './entity/user.entity.js';
+import { Problem } from './entity/problem.entity.js';
+import { ProblemController } from './problem.controller.js';
+import { ProblemService } from './problem.service.js';
 
 @Module({
   imports: [
@@ -15,16 +18,18 @@ import { User } from './entity/user.entity';
       username: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASSWORD || '123456',
       database: process.env.DB_NAME || 'pad-taf',
-      entities: [User],
+      entities: [User, Problem],
       synchronize: false, // 开发环境自动建表，生产务必改回 false
       migrationsRun: true,
       migrations: ['dist/migrations/*.js'],
       autoLoadEntities: true,
+      logging: true, // 启用SQL日志，便于调试静态资源等问题
     }),
     UserModule,
     AuthModule,
+    TypeOrmModule.forFeature([Problem]),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, ProblemController],
+  providers: [AppService, ProblemService],
 })
 export class AppModule {}

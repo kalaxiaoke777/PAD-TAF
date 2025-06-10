@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User, UserRole } from '../entity/user.entity';
+import { User, UserRole } from '../entity/user.entity.js';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -11,7 +11,16 @@ export class UserService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async createUser(username: string, password: string, role: UserRole = UserRole.USER): Promise<User> {
+  async createUser(
+    username: string,
+    password: string,
+    role: UserRole = UserRole.USER,
+  ): Promise<User> {
+    // 检查重名
+    const exist = await this.userRepository.findOne({ where: { username } });
+    if (exist) {
+      throw new ConflictException('用户名已存在');
+    }
     const hash = await bcrypt.hash(password, 10);
     const user = this.userRepository.create({ username, password: hash, role });
     return this.userRepository.save(user);
@@ -27,9 +36,12 @@ export class UserService {
     return user ?? undefined;
   }
 
-  async validateUser(username: string, password: string): Promise<User | undefined> {
+  async validateUser(
+    username: string,
+    password: string,
+  ): Promise<User | undefined> {
     const user = await this.findUserByUsername(username);
-    if (user && await bcrypt.compare(password, user.password)) {
+    if (user && (await bcrypt.compare(password, user.password))) {
       return user;
     }
     return undefined;
@@ -39,7 +51,22 @@ export class UserService {
     return this.userRepository.find();
   }
 
-  async updateUser(id: number, update: Partial<User>): Promise<User | undefined> {
+  async updateUser(
+    id: number,
+    update: Partial<User>,
+  ): Promise<User | undefined> {
+    if (update.username) {
+      // 检查重名
+      const exist = await this.userRepository.findOne({
+        where: { username: update.username },
+      });
+      if (exist && exist.id !== id) {
+        throw new ConflictException('用户名已存在');
+      }
+    }
+    if (update.password) {
+      update.password = await bcrypt.hash(update.password, 10);
+    }
     await this.userRepository.update(id, update);
     return this.findById(id);
   }

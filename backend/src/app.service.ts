@@ -6,3 +6,5 @@ export class AppService {
     return 'Hello World!';
   }
 }
+
+// 无本地 import，无需修改
