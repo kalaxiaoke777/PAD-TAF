@@ -168,6 +168,7 @@ const Overview = () => {
         background: "#222a36",
         minHeight: "vh",
         overflow: "hidden",
+        minHeight: '84vh'
       }}
     >
       <Spin spinning={loading}>

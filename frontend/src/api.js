@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:3000", // 如有需要可改为环境变量
+  baseURL: import.meta.env.VITE_API_BASE_URL, // 使用 Vite 环境变量
 });
 
 // 请求拦截器，自动加 token
@@ -27,5 +27,9 @@ export const getProblems = () => api.get("/problems");
 export const updateProblemStatus = (id, status) =>
   api.patch(`/problems/${id}/status`, { status });
 export const getProblemStats = () => api.get("/problems/stats");
+export const getCategories = () =>
+  api.get("/categories", {
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  });
 
 export default api;

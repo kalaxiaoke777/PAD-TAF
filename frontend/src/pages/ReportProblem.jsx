@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Form,
   Input,
@@ -8,18 +8,10 @@ import {
   message as antdMessage,
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { reportProblem } from "../api";
+import { reportProblem, getCategories } from "../api";
 
 const { TextArea } = Input;
 
-const typeOptions = [
-  { value: "安全", label: "安全" },
-  { value: "环境", label: "环境" },
-  { value: "电器损坏", label: "电器损坏" },
-  { value: "食堂", label: "食堂" },
-  { value: "办公", label: "办公" },
-  { value: "其他", label: "其他" },
-];
 const severityOptions = [
   { value: "低", label: "低" },
   { value: "中", label: "中" },
@@ -27,17 +19,22 @@ const severityOptions = [
 ];
 
 const ReportProblem = () => {
-  const [messageApi, contextHolder] = antdMessage.useMessage();
+  const [typeOptions, setTypeOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState([]);
-
-  // 表单初始值
   const [form] = Form.useForm();
+  const [messageApi, contextHolder] = antdMessage.useMessage();
 
-  // 上传图片变化
+  useEffect(() => {
+    getCategories().then((res) => {
+      setTypeOptions(
+        (res.data || []).map((c) => ({ value: c.name, label: c.name }))
+      );
+    });
+  }, []);
+
   const handleUploadChange = ({ fileList }) => setFileList(fileList);
 
-  // 表单提交
   const onFinish = async (values) => {
     setLoading(true);
     try {
@@ -80,7 +77,7 @@ const ReportProblem = () => {
           label="问题类型"
           rules={[{ required: true, message: "请选择问题类型" }]}
         >
-          <Select options={typeOptions} />
+          <Select options={typeOptions} loading={!typeOptions.length} />
         </Form.Item>
         <Form.Item
           name="severity"

@@ -125,7 +125,7 @@ const UserManagement = () => {
   );
 
   return (
-    <div>
+    <div style={{padding: '20px',minHeight: '84vh', background: 'white'}}>
       {contextHolder}
       <div
         style={{

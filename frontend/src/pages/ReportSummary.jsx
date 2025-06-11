@@ -11,7 +11,7 @@ import {
   Row,
   Col,
 } from "antd";
-import axios from "../api";
+import axios, { getCategories } from "../api";
 import dayjs from "dayjs";
 
 const ReportSummary = () => {
@@ -19,6 +19,7 @@ const ReportSummary = () => {
   const [loading, setLoading] = useState(false);
   const [detail, setDetail] = useState(null);
   const [detailVisible, setDetailVisible] = useState(false);
+  const [categoryOptions, setCategoryOptions] = useState([]);
 
   // 搜索与筛选状态
   const [filters, setFilters] = useState({
@@ -68,9 +69,24 @@ const ReportSummary = () => {
     fetchSummary();
   }, [filters]);
 
+  // 获取问题类型
+  useEffect(() => {
+    getCategories().then((res) => {
+      setCategoryOptions(
+        (res.data || []).map((c) => ({ value: c.name, label: c.name }))
+      );
+    });
+  }, []);
+
   // 分页切换
   const handleTableChange = (pag) => {
     setPagination(pag);
+  };
+
+  // 行点击弹窗详情
+  const handleRowClick = (record) => {
+    setDetail(record);
+    setDetailVisible(true);
   };
 
   const columns = [
@@ -117,7 +133,7 @@ const ReportSummary = () => {
   ];
 
   return (
-    <div style={{ padding: 24 }}>
+    <div style={{ padding: 24, minHeight: '84vh', background: 'white' }}>
       <h2>上报汇总</h2>
       <Row gutter={16} style={{ marginBottom: 16 }}>
         <Col span={4}>
@@ -127,10 +143,8 @@ const ReportSummary = () => {
             style={{ width: "100%" }}
             value={filters.type}
             onChange={(v) => handleFilterChange("type", v)}
-            options={Array.from(new Set(data.map((d) => d.type))).map((t) => ({
-              value: t,
-              label: t,
-            }))}
+            options={categoryOptions}
+            loading={!categoryOptions.length}
           />
         </Col>
         <Col span={4}>

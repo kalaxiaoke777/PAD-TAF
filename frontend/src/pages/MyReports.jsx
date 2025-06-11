@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Table, Tag, Button, message, Image } from "antd";
-import { getProblems } from "../api";
+import { Table, Tag, Button, message, Image, Select } from "antd";
+import { getProblems, getCategories } from "../api";
 import { useNavigate } from "react-router-dom";
 
 const statusColor = {
@@ -12,6 +12,8 @@ const statusColor = {
 const MyReports = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [categoryOptions, setCategoryOptions] = useState([]);
+  const [filters, setFilters] = useState({ type: null });
   const navigate = useNavigate();
 
   const fetchData = async () => {
@@ -27,6 +29,11 @@ const MyReports = () => {
 
   useEffect(() => {
     fetchData();
+    getCategories().then((res) => {
+      setCategoryOptions(
+        (res.data || []).map((c) => ({ value: c.name, label: c.name }))
+      );
+    });
   }, []);
 
   const columns = [
@@ -69,6 +76,15 @@ const MyReports = () => {
   return (
     <div style={{ background: "#fff", padding: 24, borderRadius: 8 }}>
       <h2>上报汇总</h2>
+      <Select
+        allowClear
+        placeholder="类型"
+        style={{ width: 120, marginBottom: 16 }}
+        value={filters.type}
+        onChange={(v) => setFilters((f) => ({ ...f, type: v }))}
+        options={categoryOptions}
+        loading={!categoryOptions.length}
+      />
       <Table
         rowKey="id"
         columns={columns}

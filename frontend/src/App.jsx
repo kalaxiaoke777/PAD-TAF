@@ -14,6 +14,7 @@ import ReportProblem from "./pages/ReportProblem";
 import MyReports from "./pages/MyReports";
 import ProblemDetail from "./pages/ProblemDetail";
 import ReportSummary from "./pages/ReportSummary";
+import CategoryManagement from "./pages/CategoryManagement";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -57,6 +58,7 @@ const App = () => {
           <Route path="/my-reports" element={<ReportSummary />} />
           <Route path="/problems/:id" element={<ProblemDetail />} />
           <Route path="/users" element={<UserManagement />} />
+          <Route path="/categories" element={<CategoryManagement />} />
           {/* 其他页面路由可在此添加，如信息总览、上报、类别管理等 */}
           {/* 兼容旧路由，重定向 /my-reports 到 /overview */}
           <Route path="/my-reports" element={<Overview />} />
